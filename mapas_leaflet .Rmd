@@ -237,67 +237,50 @@ leaflet(df) %>%
                             noHide = T))
 ```
 
-## Inserindo Demarcação da Área (Pedro Eros)
-
-- Mesmo mapa do slide anterior, agora com um círculo no local ressaltado:
-
-```{r message=F, warning=F, error=F}
-mapa_catedral <- leaflet() %>%
-  addCircles(lng=-47.8755394, lat=-15.7983419,
-             weight = 25,radius = sqrt(3.14)*20)
-```
-## addTiles (Pedro Eros)
-
-- O Leaflet constrói mapas usando os tiles, cujo significado é azulejo em inglês. Esse formato consiste em vários juntos lado a lado, como se fossem azulejos.
-
-- Para inserir os tiles no seu mapa, a função *addTiles()* é utilizada.
+## Basemaps
+- A maneira mais fácil de adicionar blocos é chamando addTiles() sem argumentos; por padrão, os blocos do OpenStreetMap são usados.
 
 ```{r message=F, warning=F, error=F}
-leaflet() %>%
+MAT <- leaflet() %>%
+  setView(lng = -47.86977, lat = -15.76261, zoom = 18) %>%
   addTiles()
+MAT  
 ```
 
-## addProviderTiles (Pedro Eros)
-
-- Para inserir outros tipos de tiles no mapa, basta utilizar a função *addProviderTiles()*.
-
-- Há vários tiles disponíveis no Leaflet. Para tipos de situações diferentes, tiles diferentes são recomendados.
-
-- Um exemplo interessante seria um mapa topográfico, que mostra o relevo de cada região.
+## Basemaps
+- Além da visualização padrão, temos outros blocos de mapa gratuitos. 
+- Para usá-los, precisamos da função addProviderTiles()
 
 ```{r message=F, warning=F, error=F}
-leaflet() %>% 
-    addProviderTiles(provider = "OpenTopoMap") %>%
-  setView(lng = -47.9292, lat = -15.7801, zoom = 3)
-```
+MAT %>%
+  addProviderTiles(providers$CartoDB.Positron)
 
-## Polígonos (Pedro Eros)
+MAT %>%
+  addProviderTiles(providers$Esri.WorldStreetMap)
+``` 
 
+# Lines and Shapes
+- O Leaflet facilita a obtenção de linhas e formas espaciais do R e as adiciona aos mapas.
 
-```{r message=F, warning=F, error=F}
-
-```
-
-## Mapa de Polígonos (Pedro Eros)
-
-- 
+# Delimitar áreas usando círculos
+- Aqui é possível delimitar a precisão de uma localização por meio do raio. 
 
 ```{r message=F, warning=F, error=F}
-
+MAT %>%
+  addCircles(lat = -15.76261, lng = -47.86977,
+             weight = 1, radiu = sqrt(3.14)*20)
+MAT
 ```
 
-## addCircles (Pedro Eros)
-
-- Usando a Função *addCircles()* você transforma o icone alfinete em um circulo.
+## Delimitando áreas usando retângulos
+- Com essa função, é possível determinar áreas dentro do mapa. 
 
 ```{r message=F, warning=F, error=F}
-circulos <- read.csv (textConnection ("City,Lat,Long,Pop
-AEROPORTO PRESIDENTE JUSCELINO KUBITSCHEK  ,-15.87177, -47.91409,3"))
-
-leaflet(circulos) %>% addTiles() %>%
-  addCircles(lng = ~Long, lat = ~Lat, weight = 1,
-             radius = ~sqrt(Pop) * 30, popup = ~City)
-
-circulos
+planaltina <- leaflet() %>% 
+  addTiles() %>%
+  addRectangles(
+    lng1=-47.68076, lat1=-15.596049,
+    lng2=-47.62090, lat2=-15.646100,
+    fillColor = "transparent")
+planaltina
 ```
-
