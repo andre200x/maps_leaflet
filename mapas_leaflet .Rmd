@@ -388,3 +388,74 @@ planaltina <- leaflet() %>%
     fillColor = "transparent")
 planaltina
 ```
+## GeoJSON/TopoJSON
+- Para trabalhar com dados GeoJSON/TopoJSON existem duas opções:ler os dados
+como objetos sp (spatial data); ou usando as funções addGeoJSON() e addTopoJSON().
+- O geoJSON formato para codificar uma variedades de dados geográficos. 
+- O topoJSON formato para codificar uma variedades de dados topográficos.
+
+```{echo echo=TRUE, =}
+# municípios de nova york
+nycounties <- 
+  rgdal::readOGR("https://rstudio.github.io/leaflet/json/nycounties.geojson")
+pal <- colorNumeric("viridis", NULL)
+leaflet(nycounties) %>%
+  addTiles() %>%
+  addPolygons(stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
+              fillColor = ~pal(log10(pop)),
+              label = ~paste0(county, ": ", formatC(pop, big.mark = ","))) %>%
+  addLegend(pal = pal, values = ~log10(pop), opacity = 1.0,
+            labFormat = labelFormat(transform = function(x) round(10^x)))
+```
+
+## Lendo com TopoJSON
+
+```{echo echo=TRUE, =}
+topoData <- 
+  readLines("https://rstudio.github.io/leaflet/json/us-10m.json") %>% 
+  paste(collapse = "\n")
+leaflet() %>% 
+  setView(lng = -98.583, lat = 39.833, zoom = 3) %>%
+  addTiles() %>%
+  addTopoJSON(topoData, weight = 1, color = "#444444", fill = FALSE)
+```
+
+## Podemos modificar o estilo do GeoJSON e do TopoJSON de algumas maneiras.
+Como aplicando argumentos direto nas funções addGeoJSON / addTopoJSON.
+
+```{r}
+install.packages("jsonlite")
+library(jsonlite)
+geojson <- readLines("https://rstudio.github.io/leaflet/json/countries.geojson", warn = FALSE) %>%
+  paste(collapse = "\n") %>%
+  fromJSON(simplifyVector = FALSE)
+# Estilo padrão para todos recursos
+geojson$style = list(
+  weight = 1,
+  color = "#555555",
+  opacity = 1,
+  fillOpacity = 0.8
+)
+# Junta o PIB de todos países
+gdp_md_est <- sapply(geojson$features, function(feat) {
+  feat$properties$gdp_md_est
+})
+# Junta a população estimada de todos países
+pop_est <- sapply(geojson$features, function(feat) {
+  max(1, feat$properties$pop_est)
+})
+# Cor por PIB per-capita usando quantis
+pal <- colorQuantile("Greens", gdp_md_est / pop_est)
+# adiciona properties$style pra cada recurso
+geojson$features <- lapply(geojson$features, function(feat) {
+  feat$properties$style <- list(
+    fillColor = pal(
+      feat$properties$gdp_md_est / max(1, feat$properties$pop_est)
+    )
+  )
+  feat
+})
+# adiciona o GeoJSON pro mapa
+leaflet() %>% 
+  addGeoJSON(geojson)
+```
