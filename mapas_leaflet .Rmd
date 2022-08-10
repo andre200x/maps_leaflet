@@ -11,7 +11,7 @@ rm(list = ls(all = TRUE))
 #setwd(setwd("C:/Users/Pedro Eros/Downloads"))
 ```
 
-## Introdução ao Leaflet (André)
+## Introdução ao Leaflet
 
 - O Leaflet é um pacote open-source de criação de mapas interativos feito para o JavaScript, mas também adaptado para uso no R.
 
@@ -21,7 +21,7 @@ rm(list = ls(all = TRUE))
 
 - Permite a customização de estéticas.
 
-## Instalação (André)
+## Instalação 
 
 - Instalação e habilitação do pacote:
 
@@ -68,33 +68,44 @@ leaflet(data = mapStates) %>% addTiles() %>%
 ```
 
 ## Markers
-- São marcadores para chamar pontos do mapa, através de coordenadas (lat/lng) 
-- Podem aparecer ou como ícones ou como círculos.
-- Os dados podem vir de algumas fontes como: SpatialPoints ou SpatialPointsDataFrame (do pacote "sp")POINT, sfc_POINT ou sf (do pacote "sf") 
-- Apenas as dimensões X e Y serão consideradas
-- Matrizes numéricas com colunas, onde a primeira coluna seria a longitude e a segunda a latitude 
-- Dataframe com colunas de longitude e latitude é possível dizer explicitamente à função quais colunas contêm os dados de coordenadas
-- Fornecer vetores numéricos com os argumento de longitude e latitude.
 
-## Admarkers
-- addMarkers(lng, lat, popup, label)
-```{r message=F, warning=F, error=F}
+- São marcadores feito por coordenadas (longitude e latitude)
+- Adicionam ícones ou círculos aos mapas 
 
+### AddMarkers()
+- principal função para criar ícones
+
+### addCircles
+- principal função para criar círculos 
+
+
+## Quakes
+- Data frame com 1000 observações em 5 variáveis
+- latitude, longitude, profundidade (km), magnitude, número de relatórios de estações
+- Esse conjunto de dados fornece as localizações de 1000 eventos sísmicos com magnitude acima de 4, que foram coletados perto de Fiji (arquipélago com mais de 300 ilhas)
+- Para mais informações sobre o data frame [clique aqui](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/quakes.html)
+
+```{r message=F, warning=F, error=F, echo = FALSE}
+data(quakes)
 head(quakes)
+```
+
+
+## addMarkers
+
+### addMarkers(lng, lat, popup, label)
+- Adiciona ícone por default
+
+```{r}
 leaflet(data = quakes[1:6,]) %>% 
   addTiles() %>%
   addMarkers(~long, ~lat)
-``` 
-- Adiciona ícones básicos (default)
-- Data frame com 1000 observações com 5 variáveis.
-- Latitude, longitude, profundidade (km), magnitude, Número de relatórios de estações.
-https://stat-ethz-ch.translate.goog/R-manual/R-devel/library/datasets/html/quakes.html?_x_tr_sl=en&_x_tr_tl=pt&_x_tr_hl=pt-BR&_x_tr_pto=sc
+```
 
-## makeIcon/icons 
-- iconUrl, iconWidth, iconHeight, iconAnchorX, iconAnchorY, shadowUrl, shadowWidth, shadowHeight, ... 
+## makeIcon
+- Com ela possível alterar esses ícones por link ou imagem presente no computador e afins
 
-```{r message=F, warning=F, error=F}
-
+```{r eval=FALSE}
 leaflet_Icon <- makeIcon(
   iconUrl = "https://icons.iconarchive.com/icons/shlyapnikova/toolbar-2/32/pin-icon.png",
   iconWidth = 25, iconHeight = 50,
@@ -106,10 +117,25 @@ leaflet(data = quakes[1:6,]) %>%
   addMarkers(~long, ~lat, icon = leaflet_Icon)
 ```
 
-## Múltiplos ícones
-- Ambos possuem o mesmo tamanho e pontos de ancoragem. 
+## makeIcon
 
-```{r message=F, warning=F, error=F}
+```{r echo=FALSE}
+leaflet_Icon <- makeIcon(
+  iconUrl = "https://icons.iconarchive.com/icons/shlyapnikova/toolbar-2/32/pin-icon.png",
+  iconWidth = 25, iconHeight = 50,
+  iconAnchorX = 1, iconAnchorY = 45
+)
+
+leaflet(data = quakes[1:6,]) %>% 
+  addTiles() %>%
+  addMarkers(~long, ~lat, icon = leaflet_Icon)
+```
+
+
+## Múltiplos ícones
+- Usa-se *icons()* para todos possuirem o mesmo tamanho e pontos de ancoragem
+
+```{r eval=FALSE}
 leaflet_Icons <- icons(
   iconUrl = 
     ifelse(quakes[1:10,]$mag < 4.6,
@@ -123,10 +149,29 @@ leaflet(data = quakes[1:10,]) %>%
   addTiles() %>%
   addMarkers(~long, ~lat, icon = leaflet_Icons)
 ```
-## iconList() 
-- Permite criar uma lista de ícones, com diferentes ícones e parâmetros a partir da função makeIcon().
 
-```{r message=F, warning=F, error=F}
+## Múltiplos ícones
+
+```{r echo=FALSE}
+leaflet_Icons <- icons(
+  iconUrl = 
+    ifelse(quakes[1:10,]$mag < 4.6,
+           "https://icons.iconarchive.com/icons/shlyapnikova/toolbar-2/32/pin-icon.png",
+           "http://clubedefinancas.com.br/wp-content/uploads/2018/04/map-marker-icon.png"
+  ),
+  iconWidth = 25, iconHeight = 50,
+  iconAnchorX = 13, iconAnchorY = 54)
+
+leaflet(data = quakes[1:10,]) %>% 
+  addTiles() %>%
+  addMarkers(~long, ~lat, icon = leaflet_Icons)
+```
+
+
+## Múltiplos ícones
+- Usa-se *iconList()* para criar uma lista, em que os parâmetros são diferentes
+
+```{r eval=FALSE}
 icon_data <- iconList(
   red = makeIcon(
     iconUrl = "http://clubedefinancas.com.br/wp-content/uploads/2018/04/map-marker-icon.png",
@@ -143,11 +188,33 @@ leaflet(data = quakes_2[1:10,]) %>%
   addTiles() %>%
   addMarkers(~long, ~lat, icon = ~icon_data[type])
 ```
-## Awesome Icons 
-- Funções addAwesomeMarkers(), makeAwesomeIcon(), awesomeIcons(), awesomeIconList()
-- Customizando cores e ícones 
 
-```{r message=F, warning=F, error=F}
+## Múltiplos ícones
+```{r echo=FALSE}
+icon_data <- iconList(
+  red = makeIcon(
+    iconUrl = "http://clubedefinancas.com.br/wp-content/uploads/2018/04/map-marker-icon.png",
+    iconWidth = 23, iconHeight = 38),
+  green = makeIcon(
+    iconUrl = "https://icons.iconarchive.com/icons/shlyapnikova/toolbar-2/32/pin-icon.png",
+    iconWidth = 32, iconHeight = 28)
+)
+
+quakes_2 <- mutate(quakes, 
+                   type = factor(ifelse(quakes$mag < 4.6, "green", "red")))
+
+leaflet(data = quakes_2[1:10,]) %>% 
+  addTiles() %>%
+  addMarkers(~long, ~lat, icon = ~icon_data[type])
+```
+
+
+## Awesome Icons
+- Principais funções *addAwesomeMarkers()*, *makeAwesomeIcon()*, *awesomeIcons()*, *awesomeIconList()*
+- Similar as anteriores, mas agora pode customizar cores e ícones 
+- Como com ícones das bibliotecas: `Font Awesome`, `Bootstrap Glyphicons`, e `Ion icons`
+
+```{r eval=FALSE}
 icon_fa <- makeAwesomeIcon(
   icon = "exclamation", markerColor = "orange",
   library = "fa", iconColor = "black")
@@ -156,7 +223,18 @@ leaflet(data = quakes[1:10,]) %>%
   addTiles() %>%
   addAwesomeMarkers(~long, ~lat, icon =icon_fa )
 ```
-- O argumento library pode ser ‘ion’, ‘fa’, ou ‘glyphicon’. 
+
+## Awesome Icons
+
+```{r echo=FALSE}
+icon_fa <- makeAwesomeIcon(
+  icon = "exclamation", markerColor = "orange",
+  library = "fa", iconColor = "black")
+
+leaflet(data = quakes[1:10,]) %>% 
+  addTiles() %>%
+  addAwesomeMarkers(~long, ~lat, icon =icon_fa )
+```
 
 ## Marker Clusters
 ```{r message=F, warning=F, error=F}
@@ -164,12 +242,7 @@ leaflet(quakes) %>%
   addTiles() %>% 
   addMarkers(~long, ~lat, clusterOptions = markerClusterOptions())
 ```
-- Congelando o zoom
-```{r message=F, warning=F, error=F}
-leaflet(quakes) %>% 
-  addTiles() %>% 
-  addMarkers(clusterOptions = markerClusterOptions(freezeAtZoom = 5))
-```
+
 
 ## Circle Markers
 ```{r message=F, warning=F, error=F}
@@ -178,6 +251,8 @@ leaflet(quakes[1:20,]) %>%
   addTiles() %>% 
   addCircleMarkers()
 ```
+
+## Circle Markers
 - Alterando cor, raio e transparência
 ```{r message=F, warning=F, error=F}
 leaflet(quakes_2[1:10,]) %>% 
@@ -194,9 +269,12 @@ leaflet(quakes_2[1:10,]) %>%
 leaflet(data = quakes[1:20,]) %>% addTiles() %>%
   addMarkers(~long, ~lat, popup = ~as.character(mag))
 ```
+
+## Popups
 - Possui 2 principais formas de cria-los: função addPopups() ou como parâmetro em addMarkers(..., popup, ...).
 
-```{r message=F, warning=F, error=F}
+- Por default, é necessário "clicar" no local para aparecer a caixa de texto
+```{r message=F, warning=F, error=F, echo=FALSE}
 
 content <- paste(sep = "<br/>",
   "<b><a href='http://www.est.unb.br/'>Estatística Unb</a></b>",
@@ -217,8 +295,33 @@ leaflet(df) %>%
   addMarkers(~Long, ~Lat, popup = ~Local)
 ```
 
+## Popups
+
+```{r message=F, warning=F, error=F, eval=FALSE}
+
+content <- paste(sep = "<br/>",
+  "<b><a href='http://www.est.unb.br/'>Estatística Unb</a></b>",
+  "(61) 3107-3661")
+
+leaflet() %>% 
+  addTiles() %>%
+  addPopups(-47.8690438, -15.7584196, content,
+            options = popupOptions(closeButton = T))
+
+Local <- c("Departamento CIC/EST", "Departamento de Mat", "FACE")
+Lat <- c(-15.7584196, -15.7623606, -15.7585618)
+Long <- c(-47.8690438, -47.8696452, -47.8715123)
+df <- data.frame(Local, Lat,Long)
+
+leaflet(df) %>% 
+  addTiles() %>%
+  addMarkers(~Long, ~Lat, popup = ~Local)
+```
+
+
 ## Labels
-- Semelhante ao anterior, mas só de passar o mouse o bloco de texto aparece. 
+- é similar ao *Popups*, mas esse só de passar o mouse o texto é exibido
+ 
 ```{r message=F, warning=F, error=F}
 
 leaflet(df) %>% 
@@ -226,6 +329,7 @@ leaflet(df) %>%
   addMarkers(~Long, ~Lat, label = ~Local)
 ```
 
+## Labels
 - Modificando o texto:
 ```{r message=F, warning=F, error=F}
 
@@ -259,10 +363,10 @@ MAT %>%
   addProviderTiles(providers$Esri.WorldStreetMap)
 ``` 
 
-# Lines and Shapes
+## Lines and Shapes
 - O Leaflet facilita a obtenção de linhas e formas espaciais do R e as adiciona aos mapas.
 
-# Delimitar áreas usando círculos
+## Delimitar áreas usando círculos
 - Aqui é possível delimitar a precisão de uma localização por meio do raio. 
 
 ```{r message=F, warning=F, error=F}
