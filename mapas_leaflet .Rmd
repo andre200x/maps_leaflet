@@ -1,0 +1,303 @@
+---
+title: "Mapas (Leaflet)"
+author: "Nathália Lobo, Pedro Paulo, André Fernandes e Pedro Eros"
+date: "10/08/2022"
+output: ioslides_presentation
+---
+```{r echo=F, message=F, warning=F, error=F}
+library(tidyverse)
+
+rm(list = ls(all = TRUE))
+#setwd(setwd("C:/Users/Pedro Eros/Downloads"))
+```
+
+## Introdução ao Leaflet (André)
+
+- O Leaflet é um pacote open-source de criação de mapas interativos feito para o JavaScript, mas também adaptado para uso no R.
+
+- Com o leaflet podemos criar mapas com facilidade.
+
+- O leaflet consegue renderizar objetos espacias de outros pacotes.
+
+- Permite a customização de estéticas.
+
+## Instalação (André)
+
+- Instalação e habilitação do pacote:
+
+```{r message=F, warning=F, error=F}
+#install.packages("leaflet")
+library(leaflet)
+```
+
+- Exemplo de um mapa: 
+
+```{r message=F, warning=F, error=F}
+map <- leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(lng = 174.768, lat = -36.852, popup = "Local de origem do R")
+
+map
+```
+## SetView 
+
+- Existem seis funções de manipulação de atributos dos mapas, *setView()*, *flyTo()*, *fitBounds()*, *flyToBounds()*, *setMaxBounds()*, *clearBounds()*.
+- Exemplo de mapa do Campus Darcy Ribeiro usando *setView()*:
+
+```{r message=F, warning=F, error=F}
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = -47.87091206840, lat = -15.76482224263, zoom = 15)
+```
+
+## Data Objetc
+- podemos atribuir o parametro "data" na função leaflet(), é um argumento que define um dado espacial oriundo do pacote base do R, ou do pacote sp ou do pacote maps.
+
+- esse argumento é então passado para as funçoes que precisam dele.
+
+- Exemplo é a função *addPolygons()*
+
+```{r message=F, warning=F, error=F}
+install.packages("maps", repos = "http://cran.us.r-project.org")
+library(maps)
+
+mapStates = map("state", fill = TRUE, plot = FALSE)
+leaflet(data = mapStates) %>% addTiles() %>%
+  addPolygons(fillColor = topo.colors(10, alpha = NULL), stroke = FALSE)
+
+```
+
+## Markers
+- São marcadores para chamar pontos do mapa, através de coordenadas (lat/lng) 
+- Podem aparecer ou como ícones ou como círculos.
+- Os dados podem vir de algumas fontes como: SpatialPoints ou SpatialPointsDataFrame (do pacote "sp")POINT, sfc_POINT ou sf (do pacote "sf") 
+- Apenas as dimensões X e Y serão consideradas
+- Matrizes numéricas com colunas, onde a primeira coluna seria a longitude e a segunda a latitude 
+- Dataframe com colunas de longitude e latitude é possível dizer explicitamente à função quais colunas contêm os dados de coordenadas
+- Fornecer vetores numéricos com os argumento de longitude e latitude.
+
+## Admarkers
+- addMarkers(lng, lat, popup, label)
+```{r message=F, warning=F, error=F}
+
+head(quakes)
+leaflet(data = quakes[1:6,]) %>% 
+  addTiles() %>%
+  addMarkers(~long, ~lat)
+``` 
+- Adiciona ícones básicos (default)
+- Data frame com 1000 observações com 5 variáveis.
+- Latitude, longitude, profundidade (km), magnitude, Número de relatórios de estações.
+https://stat-ethz-ch.translate.goog/R-manual/R-devel/library/datasets/html/quakes.html?_x_tr_sl=en&_x_tr_tl=pt&_x_tr_hl=pt-BR&_x_tr_pto=sc
+
+## makeIcon/icons 
+- iconUrl, iconWidth, iconHeight, iconAnchorX, iconAnchorY, shadowUrl, shadowWidth, shadowHeight, ... 
+
+```{r message=F, warning=F, error=F}
+
+leaflet_Icon <- makeIcon(
+  iconUrl = "https://icons.iconarchive.com/icons/shlyapnikova/toolbar-2/32/pin-icon.png",
+  iconWidth = 25, iconHeight = 50,
+  iconAnchorX = 1, iconAnchorY = 45
+)
+
+leaflet(data = quakes[1:6,]) %>% 
+  addTiles() %>%
+  addMarkers(~long, ~lat, icon = leaflet_Icon)
+```
+
+## Múltiplos ícones
+- Ambos possuem o mesmo tamanho e pontos de ancoragem. 
+
+```{r message=F, warning=F, error=F}
+leaflet_Icons <- icons(
+  iconUrl = 
+    ifelse(quakes[1:10,]$mag < 4.6,
+           "https://icons.iconarchive.com/icons/shlyapnikova/toolbar-2/32/pin-icon.png",
+           "http://clubedefinancas.com.br/wp-content/uploads/2018/04/map-marker-icon.png"
+  ),
+  iconWidth = 25, iconHeight = 50,
+  iconAnchorX = 13, iconAnchorY = 54)
+
+leaflet(data = quakes[1:10,]) %>% 
+  addTiles() %>%
+  addMarkers(~long, ~lat, icon = leaflet_Icons)
+```
+## iconList() 
+- Permite criar uma lista de ícones, com diferentes ícones e parâmetros a partir da função makeIcon().
+
+```{r message=F, warning=F, error=F}
+icon_data <- iconList(
+  red = makeIcon(
+    iconUrl = "http://clubedefinancas.com.br/wp-content/uploads/2018/04/map-marker-icon.png",
+    iconWidth = 23, iconHeight = 38),
+  green = makeIcon(
+    iconUrl = "https://icons.iconarchive.com/icons/shlyapnikova/toolbar-2/32/pin-icon.png",
+    iconWidth = 32, iconHeight = 28)
+)
+
+quakes_2 <- mutate(quakes, 
+                   type = factor(ifelse(quakes$mag < 4.6, "green", "red")))
+
+leaflet(data = quakes_2[1:10,]) %>% 
+  addTiles() %>%
+  addMarkers(~long, ~lat, icon = ~icon_data[type])
+```
+## Awesome Icons 
+- Funções addAwesomeMarkers(), makeAwesomeIcon(), awesomeIcons(), awesomeIconList()
+- Customizando cores e ícones 
+
+```{r message=F, warning=F, error=F}
+icon_fa <- makeAwesomeIcon(
+  icon = "exclamation", markerColor = "orange",
+  library = "fa", iconColor = "black")
+
+leaflet(data = quakes[1:10,]) %>% 
+  addTiles() %>%
+  addAwesomeMarkers(~long, ~lat, icon =icon_fa )
+```
+- O argumento library pode ser ‘ion’, ‘fa’, ou ‘glyphicon’. 
+
+## Marker Clusters
+```{r message=F, warning=F, error=F}
+leaflet(quakes) %>% 
+  addTiles() %>% 
+  addMarkers(~long, ~lat, clusterOptions = markerClusterOptions())
+```
+- Congelando o zoom
+```{r message=F, warning=F, error=F}
+leaflet(quakes) %>% 
+  addTiles() %>% 
+  addMarkers(clusterOptions = markerClusterOptions(freezeAtZoom = 5))
+```
+
+## Circle Markers
+```{r message=F, warning=F, error=F}
+
+leaflet(quakes[1:20,]) %>% 
+  addTiles() %>% 
+  addCircleMarkers()
+```
+- Alterando cor, raio e transparência
+```{r message=F, warning=F, error=F}
+leaflet(quakes_2[1:10,]) %>% 
+  addTiles() %>%
+  addCircleMarkers(radius = ~ifelse(depth < 200, 5, 10),
+    color = ~type,
+    stroke = FALSE, fillOpacity = 0.5)
+``` 
+
+## Popups
+- Adiciona pequenas caixas de mensagem nos marcadores
+```{r message=F, warning=F, error=F}
+
+leaflet(data = quakes[1:20,]) %>% addTiles() %>%
+  addMarkers(~long, ~lat, popup = ~as.character(mag))
+```
+- Possui 2 principais formas de cria-los: função addPopups() ou como parâmetro em addMarkers(..., popup, ...).
+
+```{r message=F, warning=F, error=F}
+
+content <- paste(sep = "<br/>",
+  "<b><a href='http://www.est.unb.br/'>Estatística Unb</a></b>",
+  "(61) 3107-3661")
+
+leaflet() %>% 
+  addTiles() %>%
+  addPopups(-47.8690438, -15.7584196, content,
+            options = popupOptions(closeButton = T))
+
+Local <- c("Departamento CIC/EST", "Departamento de Mat", "FACE")
+Lat <- c(-15.7584196, -15.7623606, -15.7585618)
+Long <- c(-47.8690438, -47.8696452, -47.8715123)
+df <- data.frame(Local, Lat,Long)
+
+leaflet(df) %>% 
+  addTiles() %>%
+  addMarkers(~Long, ~Lat, popup = ~Local)
+```
+
+## Labels
+- Semelhante ao anterior, mas só de passar o mouse o bloco de texto aparece. 
+```{r message=F, warning=F, error=F}
+
+leaflet(df) %>% 
+  addTiles() %>%
+  addMarkers(~Long, ~Lat, label = ~Local)
+```
+
+- Modificando o texto:
+```{r message=F, warning=F, error=F}
+
+leaflet(df) %>% 
+  addTiles() %>% 
+  addMarkers(~Long, ~Lat, label = ~Local, 
+             labelOptions = 
+               labelOptions(textsize = "15px",direction = "bottom",
+                            noHide = T))
+```
+
+## Inserindo Demarcação da Área (Pedro Eros)
+
+- Mesmo mapa do slide anterior, agora com um círculo no local ressaltado:
+
+```{r message=F, warning=F, error=F}
+mapa_catedral <- leaflet() %>%
+  addCircles(lng=-47.8755394, lat=-15.7983419,
+             weight = 25,radius = sqrt(3.14)*20)
+```
+## addTiles (Pedro Eros)
+
+- O Leaflet constrói mapas usando os tiles, cujo significado é azulejo em inglês. Esse formato consiste em vários juntos lado a lado, como se fossem azulejos.
+
+- Para inserir os tiles no seu mapa, a função *addTiles()* é utilizada.
+
+```{r message=F, warning=F, error=F}
+leaflet() %>%
+  addTiles()
+```
+
+## addProviderTiles (Pedro Eros)
+
+- Para inserir outros tipos de tiles no mapa, basta utilizar a função *addProviderTiles()*.
+
+- Há vários tiles disponíveis no Leaflet. Para tipos de situações diferentes, tiles diferentes são recomendados.
+
+- Um exemplo interessante seria um mapa topográfico, que mostra o relevo de cada região.
+
+```{r message=F, warning=F, error=F}
+leaflet() %>% 
+    addProviderTiles(provider = "OpenTopoMap") %>%
+  setView(lng = -47.9292, lat = -15.7801, zoom = 3)
+```
+
+## Polígonos (Pedro Eros)
+
+
+```{r message=F, warning=F, error=F}
+
+```
+
+## Mapa de Polígonos (Pedro Eros)
+
+- 
+
+```{r message=F, warning=F, error=F}
+
+```
+
+## addCircles (Pedro Eros)
+
+- Usando a Função *addCircles()* você transforma o icone alfinete em um circulo.
+
+```{r message=F, warning=F, error=F}
+circulos <- read.csv (textConnection ("City,Lat,Long,Pop
+AEROPORTO PRESIDENTE JUSCELINO KUBITSCHEK  ,-15.87177, -47.91409,3"))
+
+leaflet(circulos) %>% addTiles() %>%
+  addCircles(lng = ~Long, lat = ~Lat, weight = 1,
+             radius = ~sqrt(Pop) * 30, popup = ~City)
+
+circulos
+```
+
