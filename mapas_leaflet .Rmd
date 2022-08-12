@@ -423,7 +423,7 @@ leaflet() %>%
 ## Podemos modificar o estilo do GeoJSON e do TopoJSON de algumas maneiras.
 Como aplicando argumentos direto nas funções addGeoJSON / addTopoJSON.
 
-```{r}
+```{echo echo=TRUE, =}
 install.packages("jsonlite")
 library(jsonlite)
 geojson <- readLines("https://rstudio.github.io/leaflet/json/countries.geojson", warn = FALSE) %>%
