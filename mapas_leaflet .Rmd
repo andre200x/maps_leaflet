@@ -57,7 +57,7 @@ leaflet() %>%
 
 - Exemplo é a função *addPolygons()*
 
-```{r message=F, warning=F, error=F}
+```{r message=F, warning=F, error=F, eval=F}
 install.packages("maps", repos = "http://cran.us.r-project.org")
 library(maps)
 
@@ -65,6 +65,16 @@ mapStates = map("state", fill = TRUE, plot = FALSE)
 leaflet(data = mapStates) %>% addTiles() %>%
   addPolygons(fillColor = topo.colors(10, alpha = NULL), stroke = FALSE)
 
+```
+
+## Data Objetc
+
+```{r error=F, message=FALSE, warning=FALSE, echo=FALSE}
+#install.packages("maps", repos = "http://cran.us.r-project.org")
+library(maps)
+mapStates = map("state", fill = TRUE, plot = FALSE)
+leaflet(data = mapStates) %>% addTiles() %>%
+  addPolygons(fillColor = topo.colors(10, alpha = NULL), stroke = FALSE)
 ```
 
 ## Markers
@@ -274,29 +284,6 @@ leaflet(data = quakes[1:20,]) %>% addTiles() %>%
 - Possui 2 principais formas de cria-los: função addPopups() ou como parâmetro em addMarkers(..., popup, ...).
 
 - Por default, é necessário "clicar" no local para aparecer a caixa de texto
-```{r message=F, warning=F, error=F, echo=FALSE}
-
-content <- paste(sep = "<br/>",
-  "<b><a href='http://www.est.unb.br/'>Estatística Unb</a></b>",
-  "(61) 3107-3661")
-
-leaflet() %>% 
-  addTiles() %>%
-  addPopups(-47.8690438, -15.7584196, content,
-            options = popupOptions(closeButton = T))
-
-Local <- c("Departamento CIC/EST", "Departamento de Mat", "FACE")
-Lat <- c(-15.7584196, -15.7623606, -15.7585618)
-Long <- c(-47.8690438, -47.8696452, -47.8715123)
-df <- data.frame(Local, Lat,Long)
-
-leaflet(df) %>% 
-  addTiles() %>%
-  addMarkers(~Long, ~Lat, popup = ~Local)
-```
-
-## Popups
-
 ```{r message=F, warning=F, error=F, eval=FALSE}
 
 content <- paste(sep = "<br/>",
@@ -307,7 +294,24 @@ leaflet() %>%
   addTiles() %>%
   addPopups(-47.8690438, -15.7584196, content,
             options = popupOptions(closeButton = T))
+```
 
+## Popups
+
+```{r message=F, warning=F, error=F, echo=FALSE}
+content <- paste(sep = "<br/>",
+  "<b><a href='http://www.est.unb.br/'>Estatística Unb</a></b>",
+  "(61) 3107-3661")
+leaflet() %>% 
+  addTiles() %>%
+  addPopups(-47.8690438, -15.7584196, content,
+            options = popupOptions(closeButton = T))
+
+```
+
+## Popups
+
+```{r message=F, warning=F, error=F}
 Local <- c("Departamento CIC/EST", "Departamento de Mat", "FACE")
 Lat <- c(-15.7584196, -15.7623606, -15.7585618)
 Long <- c(-47.8690438, -47.8696452, -47.8715123)
@@ -394,7 +398,7 @@ como objetos sp (spatial data); ou usando as funções addGeoJSON() e addTopoJSO
 - O geoJSON formato para codificar uma variedades de dados geográficos. 
 - O topoJSON formato para codificar uma variedades de dados topográficos.
 
-```{echo echo=TRUE, =}
+```{echo echo=TRUE}
 # municípios de nova york
 nycounties <- 
   rgdal::readOGR("https://rstudio.github.io/leaflet/json/nycounties.geojson")
@@ -410,7 +414,7 @@ leaflet(nycounties) %>%
 
 ## Lendo com TopoJSON
 
-```{echo echo=TRUE, =}
+```{echo echo=TRUE}
 topoData <- 
   readLines("https://rstudio.github.io/leaflet/json/us-10m.json") %>% 
   paste(collapse = "\n")
@@ -423,7 +427,7 @@ leaflet() %>%
 ## Podemos modificar o estilo do GeoJSON e do TopoJSON de algumas maneiras.
 Como aplicando argumentos direto nas funções addGeoJSON / addTopoJSON.
 
-```{echo echo=TRUE, =}
+```{echo echo=TRUE}
 install.packages("jsonlite")
 library(jsonlite)
 geojson <- readLines("https://rstudio.github.io/leaflet/json/countries.geojson", warn = FALSE) %>%
