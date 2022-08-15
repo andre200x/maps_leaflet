@@ -13,18 +13,9 @@ map <- leaflet() %>%
   addTiles() %>% 
   addMarkers(lng = 174.768, lat = -36.852, popup = "The birthplace of R")
 
-map
-class(map)
-typeof(map)
-
 # leaflet() é uma função que retorna um "leaflet map widget"
-
-?leaflet
-
 # addTiles() e addMarkers() são similares ao + geom() no ggplot2
-
-?addTiles
-?addMarkers
+# no sentido que adicionam camadas ao seu mapa criado com a função leaflet()
 
 #### Map Widget
 
@@ -36,12 +27,9 @@ typeof(map)
 # objetos, esses objetos são os argumentos escolhidos dentro dessa função
 # e da função leafletOptions
 
-?leafletOptions
-
 ## Map Methods
-# podemos manipular os atributos do nosso map widget com uma serie de metodos
-
-?setView
+# podemos manipular os atributos do nosso map widget com uma serie de metodos, dessas funções a que
+# mais usamos é setView()
 
 map <- leaflet() %>% addTiles() %>% 
   setView(lng = -47.87080311824759, lat = -15.759003304840647, zoom = 11) # 15 18
@@ -61,6 +49,3 @@ library(maps)
 mapStates = map("state", fill = TRUE, plot = FALSE)
 leaflet(data = mapStates) %>% addTiles() %>%
   addPolygons(fillColor = topo.colors(10, alpha = NULL), stroke = FALSE)
-
-?addPolygons
-?map
